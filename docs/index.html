@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>AI Astro Lookup Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Password gate -->
+<div id="gate" class="gate">
+  <div class="gate-card">
+    <h1>AI Astro Lookup</h1>
+    <p class="gate-sub">Enter dashboard password</p>
+    <form id="gate-form">
+      <input type="password" id="gate-pw" autocomplete="current-password" placeholder="Password" autofocus>
+      <button type="submit">Unlock</button>
+    </form>
+    <p class="gate-err" id="gate-err"></p>
+  </div>
+</div>
+
+<!-- Main dashboard -->
+<div id="app" class="app hidden">
+  <header class="main-header">
+    <div class="header-left">
+      <h1>AI Astro Lookup</h1>
+      <p class="sub">App funnel, astrologer breakdown, call durations</p>
+    </div>
+    <div class="header-right">
+      <div class="date-ctrl">
+        <label>From <input type="date" id="date-from"></label>
+        <label>To <input type="date" id="date-to"></label>
+        <button id="apply-btn">Apply</button>
+      </div>
+      <p class="meta" id="data-meta"></p>
+    </div>
+  </header>
+
+  <!-- Module 1: Astrologer × Platform -->
+  <section class="module" id="mod1">
+    <h2>Astrologer × Platform</h2>
+    <p class="mod-sub">Calls and chats from Yukti. Date range: <span class="range-tag" id="range-tag-1"></span></p>
+    <div class="table-wrap">
+      <table id="astro-table">
+        <thead>
+          <tr>
+            <th>Astrologer</th>
+            <th>Platform</th>
+            <th class="num">Chats</th>
+            <th class="num">Calls</th>
+          </tr>
+        </thead>
+        <tbody id="astro-tbody"></tbody>
+        <tfoot id="astro-tfoot"></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- Module 2: Avg call duration -->
+  <section class="module" id="mod2">
+    <h2>Average Call Duration</h2>
+    <p class="mod-sub">Mean seconds per completed call. Date range: <span class="range-tag" id="range-tag-2"></span></p>
+    <div class="dur-blocks">
+      <div class="dur-block">
+        <span class="dur-label">Web only</span>
+        <span class="dur-value" id="dur-web">—</span>
+      </div>
+      <div class="dur-block">
+        <span class="dur-label">App only</span>
+        <span class="dur-value" id="dur-app">—</span>
+      </div>
+      <div class="dur-block primary">
+        <span class="dur-label">Overall</span>
+        <span class="dur-value" id="dur-overall">—</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Module 3: Entry-point funnel -->
+  <section class="module" id="mod3">
+    <h2>Entry-Point Funnel</h2>
+    <p class="mod-sub">Select one or more app entry points. Both logged-in and non-logged-in cohorts shown per entry point.</p>
+
+    <div class="ep-controls">
+      <label class="ep-check">
+        <input type="checkbox" value="M" checked>
+        <span>Menu Bar</span>
+      </label>
+      <label class="ep-check">
+        <input type="checkbox" value="B" checked>
+        <span>Bottom Nav</span>
+      </label>
+      <label class="ep-check">
+        <input type="checkbox" value="N">
+        <span>Notification</span>
+      </label>
+      <label class="ep-check">
+        <input type="checkbox" value="Bn">
+        <span>Banner (Story+Listing)</span>
+      </label>
+    </div>
+
+    <div id="funnel-area"></div>
+  </section>
+
+  <footer class="main-footer">
+    <p>Data pulled daily at 02:00 IST · Pinot (funnel) + Yukti (astrologers &amp; durations) · <a href="#" id="raw-link">raw JSON</a></p>
+  </footer>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
