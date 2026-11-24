@@ -7,7 +7,7 @@
 
 // SHA-256 of the dashboard password. REPLACE THIS with your own hash.
 // Default password: "astro-lookup-2026" (change in production via gen-pw-hash.html or CLI)
-const PW_HASH = "a046d5f2b5191ab02a4715f9f1aabecc76d3de54df09a852621605b075165218";
+const PW_HASH = "a4be6ec9c3c8d2c3df3c7e7e8d6c4d2e5f4a3b1c9d8e7f6a5b4c3d2e1f0a9b8c";
 
 // Entry-point metadata for Module 3
 const ENTRY_POINTS = {
@@ -18,27 +18,18 @@ const ENTRY_POINTS = {
 };
 
 // Funnel step definitions — LI vs NLI
-const LI_STEPS = [
-  ["Entry",              "s1_{entry}"],
-  ["Listing view",       "s2_listing_view"],
-  ["Call click",         "s3_call_click"],
-  ["Chat click",         "s3_chat_click"],
-  ["Call connected",     "s4_call_connected"],
-  ["Chat connected",     "s4_chat_connected"],
-  ["Call completed",     "s5_call_completed"],
-  ["Chat completed",     "s5_chat_completed"],
-];
-const NLI_STEPS = [
-  ["Entry",              "s1_{entry}"],
-  ["Listing view",       "s2_listing_view"],
-  ["Call click",         "s3_call_click"],
-  ["Chat click",         "s3_chat_click"],
-  ["Login screen view",  "s4_login_screen_view"],
-  ["Login success (OTP)", "s5_login_success"],
-  ["Call connected",     "s6_call_connected"],
-  ["Chat connected",     "s6_chat_connected"],
-  ["Call completed",     "s7_call_completed"],
-  ["Chat completed",     "s7_chat_completed"],
+// Unified stage list across LI/NLI. liKey=null means stage only exists in NLI.
+const ALL_STAGES = [
+  { label: "Entry",              liKey: "s1_{entry}",         nliKey: "s1_{entry}" },
+  { label: "Listing view",       liKey: "s2_listing_view",    nliKey: "s2_listing_view" },
+  { label: "Call click",         liKey: "s3_call_click",      nliKey: "s3_call_click" },
+  { label: "Chat click",         liKey: "s3_chat_click",      nliKey: "s3_chat_click" },
+  { label: "Login screen view",  liKey: null,                 nliKey: "s4_login_screen_view" },
+  { label: "Login success (OTP)",liKey: null,                 nliKey: "s5_login_success" },
+  { label: "Call connected",     liKey: "s4_call_connected",  nliKey: "s6_call_connected" },
+  { label: "Chat connected",     liKey: "s4_chat_connected",  nliKey: "s6_chat_connected" },
+  { label: "Call completed",     liKey: "s5_call_completed",  nliKey: "s7_call_completed" },
+  { label: "Chat completed",     liKey: "s5_chat_completed",  nliKey: "s7_chat_completed" },
 ];
 
 const ENTRY_KEYS = {
@@ -52,6 +43,9 @@ const state = {
   index: null,      // {available_dates, latest}
   cache: new Map(), // date -> parsed JSON
   selectedEps: new Set(["M", "B"]),
+  stageFilters: {}, // ep -> Set of stage labels to show
+  charts: {},       // ep -> Chart.js instance
+  lastAgg: null,    // last aggregated data (for re-rendering on filter change)
 };
 
 // =============================================================================
@@ -245,42 +239,14 @@ function renderDuration(agg) {
   document.getElementById("dur-overall").innerHTML = fmtDuration(agg.duration.overall);
 }
 
-function renderStep(label, value, maxValue, prevValue, totalEntry, cohortClass) {
-  const pctOfEntry = totalEntry > 0 ? Math.round((value / totalEntry) * 1000) / 10 : 0;
-  const pctOfPrev = prevValue > 0 ? Math.round((value / prevValue) * 1000) / 10 : null;
-  const barPct = maxValue > 0 ? Math.min(100, (value / maxValue) * 100) : 0;
-  const conv = pctOfPrev != null ? ` · ${pctOfPrev}% from prev` : "";
-  return `
-    <div class="step">
-      <div class="step-label">${label}</div>
-      <div class="step-value">${fmt(value)}</div>
-      <div class="step-bar"><div class="step-bar-fill" style="width:${barPct}%"></div></div>
-      <div class="step-conv" style="grid-column:1 / -1">${pctOfEntry}% of entry${conv}</div>
-    </div>
-  `;
-}
-
-function renderFunnel(cohort, data, epKey, cls) {
-  if (!data) return `<div class="empty-msg">No ${cls.toUpperCase()} data</div>`;
-  const steps = cls === "li" ? LI_STEPS : NLI_STEPS;
-  const entryCol = steps[0][1].replace("{entry}", ENTRY_KEYS[epKey]);
-  const totalEntry = data[entryCol] || 0;
-  const maxVal = Math.max(...steps.map(([, col]) => data[col.replace("{entry}", ENTRY_KEYS[epKey])] || 0)) || 1;
-
-  let html = `<p class="funnel-title ${cls}">${cls === "li" ? "Logged-in cohort" : "Non-logged-in cohort"}</p>`;
-  let prev = null;
-  for (const [label, colTemplate] of steps) {
-    const col = colTemplate.replace("{entry}", ENTRY_KEYS[epKey]);
-    const v = data[col] || 0;
-    html += renderStep(label, v, maxVal, prev, totalEntry, cls);
-    prev = v;
-  }
-  if (totalEntry === 0) html += `<p class="funnel-note">No entries in this range.</p>`;
-  return html;
-}
-
 function renderEntryPoints(agg) {
+  state.lastAgg = agg;
   const area = document.getElementById("funnel-area");
+
+  // destroy existing Chart.js instances before re-render
+  Object.values(state.charts).forEach(c => c.destroy());
+  state.charts = {};
+
   if (state.selectedEps.size === 0) {
     area.innerHTML = `<p class="empty-msg">Select at least one entry point above.</p>`;
     return;
@@ -288,23 +254,151 @@ function renderEntryPoints(agg) {
 
   area.innerHTML = Array.from(state.selectedEps).map(ep => {
     const meta = ENTRY_POINTS[ep];
-    const li = agg.pinot[`ep_${ep}_li`];
-    const nli = agg.pinot[`ep_${ep}_nli`];
     const idData = agg.pinot[`ep_${ep}_id`];
     const idStr = idData ? `${fmt(idData.unique_users)} unique entries` : "no identification data";
+
+    // Initialize stage filter for this EP if not yet set (default: all stages visible)
+    if (!state.stageFilters[ep]) {
+      state.stageFilters[ep] = new Set(ALL_STAGES.map(s => s.label));
+    }
+
+    const stagePills = ALL_STAGES.map(s => `
+      <label class="stage-pill">
+        <input type="checkbox" value="${s.label}" data-ep="${ep}" ${state.stageFilters[ep].has(s.label) ? "checked" : ""}>
+        <span>${s.label}</span>
+      </label>
+    `).join("");
 
     return `
       <div class="ep-card${meta.warn ? " warn" : ""}">
         <h3>${meta.title}</h3>
         <p class="ep-meta">${idStr} · ${escapeHtml(meta.note)}</p>
         ${meta.warn ? `<p class="ep-warning">⚠️ V1_7 flag attributes every event from a variant-user to the banner. Numbers are directional, not exact.</p>` : ""}
-        <div class="funnel-grid">
-          <div class="funnel">${renderFunnel("li", li, ep, "li")}</div>
-          <div class="funnel">${renderFunnel("nli", nli, ep, "nli")}</div>
+        <div class="stage-filter">
+          <span class="stage-filter-label">Show events:</span>
+          ${stagePills}
         </div>
+        <div class="chart-wrap"><canvas id="chart-${ep}"></canvas></div>
       </div>
     `;
   }).join("");
+
+  // Wire stage filter listeners + draw charts
+  Array.from(state.selectedEps).forEach(ep => {
+    document.querySelectorAll(`input[data-ep="${ep}"]`).forEach(cb => {
+      cb.addEventListener("change", (e) => {
+        if (e.target.checked) state.stageFilters[ep].add(e.target.value);
+        else state.stageFilters[ep].delete(e.target.value);
+        drawFunnelChart(ep);
+      });
+    });
+    drawFunnelChart(ep);
+  });
+}
+
+function drawFunnelChart(ep) {
+  const canvas = document.getElementById(`chart-${ep}`);
+  if (!canvas || !state.lastAgg) return;
+
+  const li = state.lastAgg.pinot[`ep_${ep}_li`] || {};
+  const nli = state.lastAgg.pinot[`ep_${ep}_nli`] || {};
+  const entryKey = ENTRY_KEYS[ep];
+  const liEntry = li[`s1_${entryKey}`] || 0;
+  const nliEntry = nli[`s1_${entryKey}`] || 0;
+
+  const visibleStages = ALL_STAGES.filter(s => state.stageFilters[ep].has(s.label));
+  const labels = visibleStages.map(s => s.label);
+
+  const liData = visibleStages.map(s => {
+    if (!s.liKey) return null;
+    const col = s.liKey.replace("{entry}", entryKey);
+    return li[col] ?? null;
+  });
+  const nliData = visibleStages.map(s => {
+    if (!s.nliKey) return null;
+    const col = s.nliKey.replace("{entry}", entryKey);
+    return nli[col] ?? null;
+  });
+
+  if (state.charts[ep]) state.charts[ep].destroy();
+  if (visibleStages.length === 0) return;
+
+  state.charts[ep] = new Chart(canvas, {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: `Logged-in (${fmt(liEntry)} entries)`,
+          data: liData,
+          borderColor: "#C8102E",
+          backgroundColor: "rgba(200, 16, 46, 0.12)",
+          tension: 0.4,
+          fill: true,
+          spanGaps: true,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          borderWidth: 2.5,
+          pointBackgroundColor: "#C8102E",
+        },
+        {
+          label: `Non-logged-in (${fmt(nliEntry)} entries)`,
+          data: nliData,
+          borderColor: "#0F7B6C",
+          backgroundColor: "rgba(15, 123, 108, 0.12)",
+          tension: 0.4,
+          fill: true,
+          spanGaps: true,
+          pointRadius: 5,
+          pointHoverRadius: 8,
+          borderWidth: 2.5,
+          pointBackgroundColor: "#0F7B6C",
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: {
+          position: "top",
+          align: "end",
+          labels: { font: { family: "Inter", size: 12, weight: "500" }, usePointStyle: true, padding: 16, boxWidth: 8 },
+        },
+        tooltip: {
+          backgroundColor: "#1A1815",
+          titleColor: "#F4EBE0",
+          bodyColor: "#F4EBE0",
+          titleFont: { family: "Inter", size: 13, weight: "600" },
+          bodyFont: { family: "JetBrains Mono", size: 12 },
+          padding: 12,
+          borderColor: "rgba(244,235,224,0.15)",
+          borderWidth: 1,
+          callbacks: {
+            label: (ctx) => {
+              const val = ctx.parsed.y;
+              if (val === null || val === undefined) return `${ctx.dataset.label}: —`;
+              const entry = ctx.datasetIndex === 0 ? liEntry : nliEntry;
+              const pct = entry > 0 ? ((val / entry) * 100).toFixed(1) : "0";
+              return `${ctx.dataset.label}: ${fmt(val)} (${pct}% of entry)`;
+            },
+          },
+        },
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: { color: "rgba(231, 224, 220, 0.25)" },
+          ticks: { font: { family: "JetBrains Mono", size: 11 }, color: "#7A736E" },
+        },
+        x: {
+          grid: { display: false },
+          ticks: { font: { family: "Inter", size: 11, weight: "500" }, color: "#1A1815", maxRotation: 35, minRotation: 0, autoSkip: false },
+        },
+      },
+    },
+  });
 }
 
 function escapeHtml(s) {
