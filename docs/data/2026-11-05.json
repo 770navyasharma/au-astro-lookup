@@ -1,0 +1,245 @@
+{
+  "date": "2026-11-05",
+  "generated_at": "2026-11-24T15:39:00.427752+00:00",
+  "pinot": {
+    "smoke": [
+      {
+        "event_type": "PAGE_VIEW",
+        "n": 3172522,
+        "uniq_users": 193455
+      },
+      {
+        "event_type": "BOTTOM_NAVIGATION",
+        "n": 125646,
+        "uniq_users": 78517
+      },
+      {
+        "event_type": "MENU_OPTION_CLICK",
+        "n": 3340,
+        "uniq_users": 1922
+      },
+      {
+        "event_type": "AI_ASTRO_CALL_CLICK",
+        "n": 264,
+        "uniq_users": 188
+      },
+      {
+        "event_type": "AI_ASTRO_CALL_CONNECTED",
+        "n": 169,
+        "uniq_users": 120
+      },
+      {
+        "event_type": "AI_ASTRO_BANNER_CLICK",
+        "n": 134,
+        "uniq_users": 89
+      },
+      {
+        "event_type": "AI_ASTRO_CALL_END_USER",
+        "n": 103,
+        "uniq_users": 76
+      },
+      {
+        "event_type": "AI_ASTRO_CALL_END_TIMEUP",
+        "n": 53,
+        "uniq_users": 45
+      },
+      {
+        "event_type": "AI_ASTRO_OTP_VERIFIED",
+        "n": 15,
+        "uniq_users": 15
+      },
+      {
+        "event_type": "AI_ASTRO_DEEPLINK_OPEN",
+        "n": 8,
+        "uniq_users": 7
+      },
+      {
+        "event_type": "AI_ASTRO_CHAT_CLICK",
+        "n": 4,
+        "uniq_users": 3
+      },
+      {
+        "event_type": "AI_ASTRO_CHAT_END_USER",
+        "n": 1,
+        "uniq_users": 1
+      },
+      {
+        "event_type": "AI_ASTRO_CHAT_CONNECTED",
+        "n": 1,
+        "uniq_users": 1
+      }
+    ],
+    "ep_M_id": {
+      "entries": 172,
+      "unique_users": 100
+    },
+    "ep_M_li": {
+      "s1_menu_click": 82,
+      "s2_listing_view": 82,
+      "s3_call_click": 30,
+      "s3_chat_click": 1,
+      "s4_call_connected": 29,
+      "s4_chat_connected": 1,
+      "s5_call_completed": 25,
+      "s5_chat_completed": 1
+    },
+    "ep_M_nli": {
+      "s1_menu_click": 24,
+      "s2_listing_view": 23,
+      "s3_call_click": 2,
+      "s3_chat_click": 1,
+      "s4_login_screen_view": 3,
+      "s5_login_success": 1,
+      "s6_call_connected": 1,
+      "s6_chat_connected": 1,
+      "s7_call_completed": 1,
+      "s7_chat_completed": 1
+    },
+    "ep_B_id": {
+      "entries": 0,
+      "unique_users": 0
+    },
+    "ep_B_li": {
+      "s1_bottom_nav_click": 0,
+      "s2_listing_view": 0,
+      "s3_call_click": 0,
+      "s3_chat_click": 0,
+      "s4_call_connected": 0,
+      "s4_chat_connected": 0,
+      "s5_call_completed": 0,
+      "s5_chat_completed": 0
+    },
+    "ep_B_nli": {
+      "s1_bottom_nav_click": 0,
+      "s2_listing_view": 0,
+      "s3_call_click": 0,
+      "s3_chat_click": 0,
+      "s4_login_screen_view": 0,
+      "s5_login_success": 0,
+      "s6_call_connected": 0,
+      "s6_chat_connected": 0,
+      "s7_call_completed": 0,
+      "s7_chat_completed": 0
+    },
+    "ep_N_id": {
+      "entries": 0,
+      "unique_users": 0
+    },
+    "ep_N_li": {
+      "s1_notif_open": 0,
+      "s2_listing_view": 0,
+      "s3_call_click": 0,
+      "s3_chat_click": 0,
+      "s4_call_connected": 0,
+      "s4_chat_connected": 0,
+      "s5_call_completed": 0,
+      "s5_chat_completed": 0
+    },
+    "ep_N_nli": {
+      "s1_notif_open": 0,
+      "s2_listing_view": 0,
+      "s3_call_click": 0,
+      "s3_chat_click": 0,
+      "s4_login_screen_view": 0,
+      "s5_login_success": 0,
+      "s6_call_connected": 0,
+      "s6_chat_connected": 0,
+      "s7_call_completed": 0,
+      "s7_chat_completed": 0
+    },
+    "ep_Bn_id": {
+      "entries": 27,
+      "unique_users": 18
+    },
+    "ep_Bn_li": {
+      "s1_banner_click": 13,
+      "s2_listing_view": 13,
+      "s3_call_click": 4,
+      "s3_chat_click": 1,
+      "s4_call_connected": 3,
+      "s4_chat_connected": 1,
+      "s5_call_completed": 3,
+      "s5_chat_completed": 1
+    },
+    "ep_Bn_nli": {
+      "s1_banner_click": 5,
+      "s2_listing_view": 5,
+      "s3_call_click": 1,
+      "s3_chat_click": 1,
+      "s4_login_screen_view": 1,
+      "s5_login_success": 1,
+      "s6_call_connected": 1,
+      "s6_chat_connected": 1,
+      "s7_call_completed": 1,
+      "s7_chat_completed": 1
+    }
+  },
+  "pinot_errors": {},
+  "yukti": {
+    "stats": {
+      "total_users": 117,
+      "total_conversations": 184,
+      "total_agents": 4,
+      "today_count": 0,
+      "repeat_consultations": 153,
+      "repeat_today": 0,
+      "repeat_percentage": 83.2
+    },
+    "astrologers": [
+      {
+        "name": "Dr. Priya Verma",
+        "platform": "app",
+        "property": "Amar Ujala",
+        "calls": 72,
+        "chats": 0,
+        "avg_call_duration": 103.2,
+        "avg_chat_duration": 0,
+        "total": 72
+      },
+      {
+        "name": "Maha Guru",
+        "platform": "app",
+        "property": "Amar Ujala",
+        "calls": 43,
+        "chats": 0,
+        "avg_call_duration": 95.1,
+        "avg_chat_duration": 0,
+        "total": 43
+      },
+      {
+        "name": "Saumya Nautiyal",
+        "platform": "app",
+        "property": "Amar Ujala",
+        "calls": 41,
+        "chats": 0,
+        "avg_call_duration": 93.9,
+        "avg_chat_duration": 0,
+        "total": 41
+      },
+      {
+        "name": "अजय त्रिपाठी",
+        "platform": "app",
+        "property": "Amar Ujala",
+        "calls": 28,
+        "chats": 0,
+        "avg_call_duration": 74.9,
+        "avg_chat_duration": 0,
+        "total": 28
+      }
+    ],
+    "avg_duration": {
+      "web": 0,
+      "app": 94.9,
+      "overall": 94.9
+    },
+    "totals": {
+      "web_calls": 0,
+      "app_calls": 184,
+      "web_chats": 0,
+      "app_chats": 0
+    },
+    "raw_count": 184,
+    "pages_fetched": 2
+  },
+  "yukti_error": null
+}
