@@ -7,7 +7,7 @@
 
 // SHA-256 of the dashboard password. REPLACE THIS with your own hash.
 // Default password: "astro-lookup-2026" (change in production via gen-pw-hash.html or CLI)
-const PW_HASH = "a4be6ec9c3c8d2c3df3c7e7e8d6c4d2e5f4a3b1c9d8e7f6a5b4c3d2e1f0a9b8c";
+const PW_HASH = "a046d5f2b5191ab02a4715f9f1aabecc76d3de54df09a852621605b075165218";
 
 // Entry-point metadata for Module 3
 const ENTRY_POINTS = {
